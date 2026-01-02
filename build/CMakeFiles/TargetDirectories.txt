@@ -1,0 +1,3 @@
+D:/Bella/build/CMakeFiles/Bella.dir
+D:/Bella/build/CMakeFiles/ALL_BUILD.dir
+D:/Bella/build/CMakeFiles/ZERO_CHECK.dir
