@@ -61,10 +61,6 @@ namespace Resource
             {
                 return index;
             }
-            inline unsigned int getPhysicalIndex() const
-            {
-                return physical_index;
-            }
             inline std::string getName() const
             {
                 return name;
