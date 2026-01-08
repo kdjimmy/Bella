@@ -1,0 +1,26 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${vcpkgRoot}/x64-windows/include",
+                "${vcpkgRoot}/x86-windows/include",
+                "${workspaceFolder}/**",
+                "C:\\VulkanSDK\\1.3.290.0\\Include",
+                "C:/VulkanSDK/1.3.290.0/Include/vulkan"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.26100.0",
+            "compilerPath": "c:\\msys64\\mingw64\\bin\\g++.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-msvc-x64"
+        }
+    ],
+    "version": 4
+}
