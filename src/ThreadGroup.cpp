@@ -17,8 +17,8 @@ namespace Task
             std::cout << "thread group is inactive" << std::endl;
             return;
         }
-        waitIdle();
-        // call all threads to stop
+
+        dead = true;
         {
             std::unique_lock<std::mutex> lk(foreGround.mtx);
             foreGround.cv.notify_all();
@@ -27,6 +27,9 @@ namespace Task
             std::unique_lock<std::mutex> lk(backGround.mtx);
             backGround.cv.notify_all();
         }
+        waitIdle();
+        // call all threads to stop
+
 
         for(uint32_t i = 0; i < foreGround.threads.size(); i++)
         {
@@ -73,7 +76,7 @@ namespace Task
 
         for(uint32_t i = 0; i < backGroundThreads; i++)
         {
-            auto& t = backGround.threads[(int)i];
+            auto& t = backGround.threads[(int)(i)];
             t = std::make_unique<Thread>(std::thread(Func, i + 1 + foreGroundThreads, TaskKind::BackGround), i + 1 + foreGroundThreads);
         }
     }
@@ -93,24 +96,10 @@ namespace Task
 
     void ThreadGroup::addDependency(TaskGroup& dependee, TaskGroup& dependency)
     {
-        dependency.depend.get()->pending.push_back(std::shared_ptr<TaskDependency>(dependee.depend.get()));
+        dependency.depend.get()->pending.push_back(dependency.depend);
         dependee.depend.get()->dependencyCount.fetch_add(1, std::memory_order_acq_rel);
     }
 
-    template<class T>
-    void ThreadGroup::enqueueTask(T&& tasks, TaskGroup& group)
-    {
-        total_task_count.fetch_add(1, std::memory_order::memory_order_acq_rel);
-        group.enqueueTask(std::forward<T>(tasks));
-    }
-
-    template<class T>
-    TaskGroup* ThreadGroup::createTaskGroup(T&& tasks)
-    {
-        TaskGroup* taskGroup = new TaskGroup(this, 0);
-        enqueueTask(std::forward<T>(tasks), *taskGroup);
-        return taskGroup;
-    }
 
     void ThreadGroup::addToReadyQueue(std::vector<std::shared_ptr<Task>>&& tasks)
     {
@@ -122,11 +111,13 @@ namespace Task
             {
                 foreGround.taskQueue.emplace(std::move(it));
                 fgTaskCount++;
+                continue;
             }
             if (it.get()->taskDependency.get()->taskClass == TaskKind::BackGround)
             {
                 backGround.taskQueue.emplace(std::move(it));
                 bgTaskCount++;
+                continue;
             }
         }
 
@@ -172,14 +163,14 @@ namespace Task
                 std::unique_lock<std::mutex> lk(threadSet->mtx);
                 threadSet->cv.wait(lk, [&, this]()
                     {
-                        return dead && !threadSet->taskQueue.empty();
+                        return dead || !threadSet->taskQueue.empty();
                     });
 
                 if (dead && threadSet->taskQueue.empty())
                 {
                     break;
                 }
-                std::shared_ptr<Task> task(threadSet->taskQueue.front());
+                std::shared_ptr<Task> task = threadSet->taskQueue.front();
                 threadSet->taskQueue.pop();
                 if (task.get()->callable.isActive())
                 {
@@ -193,6 +184,7 @@ namespace Task
                     std::unique_lock<std::mutex> wait_lk(wait_mtx);
                     wait_cv.notify_all();
                 }
+                std::cout << "use count = " << task.use_count() << " dependency count = " << task.get()->taskDependency.use_count() << std::endl;
             }
     }
 }

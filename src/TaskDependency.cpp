@@ -2,11 +2,11 @@
 #include "ThreadGroup.h"
 namespace Task
 {
-    TaskDependency::TaskDependency(ThreadGroup* group) :threadGroup(group)
+    TaskDependency::TaskDependency(ThreadGroup* group, TaskKind type) :threadGroup(group), taskClass(type)
     {
         completed_Task.store(0, std::memory_order_relaxed);
         pending_task.store(0, std::memory_order_relaxed);
-        dependencyCount.store(1, std::memory_order_relaxed);
+        dependencyCount.store(0, std::memory_order_relaxed);
     }
 
     //get the remaining task, it reaches 1, notify the dependee to run
@@ -30,7 +30,7 @@ namespace Task
         {
             taskDep.get()->dependency_satisfied();
         }
-        pending.clear();
+        //pending.clear();
         std::unique_lock<std::mutex> lk(mtx);
         finished = true;
         cv.notify_all();
@@ -40,11 +40,11 @@ namespace Task
     bool TaskDependency::dependency_satisfied()
     {
         auto tmp = dependencyCount.fetch_sub(1, std::memory_order_acq_rel);
-        if (tmp == 1)
+        if (tmp <= 1)
         {
             if (tasks.size() > 0)
             {
-                //threadGroup->addToReadyQueue(std::move(tasks));
+                threadGroup->addToReadyQueue(std::move(tasks));
                 tasks.clear();
             }
             else notify_dependees();

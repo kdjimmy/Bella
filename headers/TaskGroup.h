@@ -14,18 +14,19 @@ namespace Task
             bool flushed = false;
         public:
             std::shared_ptr<TaskDependency> depend;
-            explicit TaskGroup(ThreadGroup* _group, int _id)
+            explicit TaskGroup(ThreadGroup* _group, int _id, TaskKind type = TaskKind::ForeGround)
             {
+                depend = std::make_shared<TaskDependency>(_group, type);
                 group = _group;
                 id = _id;
-                depend.get()->pending_task.store(0, std::memory_order::memory_order_acquire);
+                //depend.get()->pending_task.store(0, std::memory_order::memory_order_acquire);
             }
 
             //push task into this task group
             template<class T>
             void enqueueTask(T&& tasks)
             {
-                depend.get()->tasks.push_back(std::forward<T>(tasks));
+                depend.get()->tasks.push_back(std::make_shared<Task>(depend, std::forward<T>(tasks)));
                 depend.get()->pending_task.fetch_add(1, std::memory_order_acq_rel);
             }
 

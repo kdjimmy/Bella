@@ -48,7 +48,8 @@ namespace Task
     class TaskDependency
     {
         public:
-            explicit TaskDependency(ThreadGroup* group);
+            explicit TaskDependency(ThreadGroup* group, TaskKind type = TaskKind::ForeGround);
+            ~TaskDependency() { std::cerr << "TaskDependency dtor: " << this << "\n"; }
             void task_Completed();
             bool dependency_satisfied();
             void notify_dependees();
@@ -63,12 +64,8 @@ namespace Task
             std::vector<std::shared_ptr<TaskDependency>> pending;           //依赖于我的其他依赖
             std::atomic_uint completed_Task;
             
-            std::vector<Task*> tasks;
+            std::vector<std::shared_ptr<Task>> tasks;
             
             std::atomic_uint dependencyCount;       //我依赖于其他的依赖数量
-
-            
-            
-            
     }; 
 }

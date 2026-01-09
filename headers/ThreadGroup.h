@@ -7,6 +7,11 @@ namespace Task
     {
         std::thread thread;
         uint32_t id;
+        Thread(std::thread&& _thread, uint32_t _id)
+        {
+            thread = std::move(_thread);
+            id = _id;
+        }
     };
     struct threadSet
     {
@@ -39,10 +44,21 @@ namespace Task
         ThreadGroup& operator=(ThreadGroup&& other) = delete;
         void start(uint32_t foreGroundThreads, uint32_t backGroundThreads);
         void stop();
+
         template<class T>
-        void enqueueTask(T&& tasks, TaskGroup& group);
+        inline void enqueueTask(T&& tasks, TaskGroup& group)
+        {
+            //total_task_count.fetch_add(1, std::memory_order::memory_order_acq_rel);
+            group.enqueueTask(std::forward<T>(tasks));
+        }
+
         template<class T>
-        TaskGroup* createTaskGroup(T&& tasks);
+        inline TaskGroup* createTaskGroup(T&& tasks)
+        {
+            TaskGroup* taskGroup = new TaskGroup(this, 0);
+            enqueueTask(std::forward<T>(tasks), *taskGroup);
+            return taskGroup;
+        }
         void addToReadyQueue(std::vector<std::shared_ptr<Task>>&& tasks);
         void addDependency(TaskGroup& dependee, TaskGroup& dependency);
         //wait idle calls the main thread to wait until all tasks have finished

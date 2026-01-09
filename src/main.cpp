@@ -1,6 +1,51 @@
 #include "FrameGraph.h"
-#include "Task.h"
+//#include "Task.h"
+#include "ThreadGroup.h"
 
+
+int main()
+{
+    std::unique_ptr<Task::ThreadGroup> threadGroup = std::make_unique<Task::ThreadGroup>();
+    threadGroup->start(20, 20);
+    Task::TaskGroup group1(threadGroup.get(), 0, Task::TaskKind::ForeGround);
+    Task::TaskGroup group2(threadGroup.get(), 1, Task::TaskKind::BackGround);
+    Task::TaskGroup group3(threadGroup.get(), 2, Task::TaskKind::BackGround);
+    Task::TaskGroup group4(threadGroup.get(), 3, Task::TaskKind::ForeGround);
+    threadGroup->addDependency(group2, group1);
+    threadGroup->addDependency(group3, group1);
+    threadGroup->addDependency(group4, group2);
+    threadGroup->addDependency(group4, group3);
+    auto taskFunc = [](int a)->void
+    {
+        std::cout << "task func a = " << a << std::endl;
+    };
+    for(int i = 0; i < 40; i ++)
+    {
+        auto realFunc = std::bind(taskFunc, i);
+        if(i < 5)
+        {
+            threadGroup->enqueueTask(std::move(realFunc), group1);
+        }
+        else if(i < 10)
+        {
+            threadGroup->enqueueTask(std::move(realFunc), group2);
+        }
+        else if(i < 15)
+        {
+            threadGroup->enqueueTask(std::move(realFunc), group3);
+        }
+        else
+        {
+            threadGroup->enqueueTask(std::move(realFunc), group4);
+        }
+    }
+    threadGroup->submit(group1);
+    threadGroup->submit(group2);
+    threadGroup->submit(group3);
+    threadGroup->submit(group4);
+    //threadGroup->stop();
+    return 0;
+}
 class A
 {
     public:
@@ -23,7 +68,8 @@ int fa(int a,int b)
     return c;
 }
 
-int main()
+
+int main1()
 {
     auto func = [](int a,int b)->int{
         int c = a + b;

@@ -128,12 +128,13 @@ namespace Task
     {
     public:
             Callable<void(), 64, 8> callable;
-            std::unique_ptr<TaskDependency> taskDependency;
+            std::shared_ptr<TaskDependency> taskDependency;
             template<class T>
-            explicit Task(std::unique_ptr<TaskDependency> dep, T&& func)
+            explicit Task(std::shared_ptr<TaskDependency> dep, T&& func)
             {
-                taskDependency = std::move(dep);
+                taskDependency = dep;
                 callable = std::forward<T>(func);
             }
+            ~Task() { std::cerr << "Task dtor: " << this << "\n"; }
     };
 }
