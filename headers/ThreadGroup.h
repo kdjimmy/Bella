@@ -22,7 +22,7 @@ namespace Task
     };
 
     inline std::function<void()> beginFuntion = []() -> void {
-        std::cout << "begin thread tid = " << std::this_thread::get_id() << std::endl;
+        //std::cout << "begin thread tid = " << std::this_thread::get_id() << std::endl;
     };
 
     class ThreadGroup

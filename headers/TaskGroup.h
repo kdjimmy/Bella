@@ -16,7 +16,7 @@ namespace Task
             std::shared_ptr<TaskDependency> depend;
             explicit TaskGroup(ThreadGroup* _group, int _id, TaskKind type = TaskKind::ForeGround)
             {
-                depend = std::make_shared<TaskDependency>(_group, type);
+                depend = std::make_shared<TaskDependency>(_group, _id, type);
                 group = _group;
                 id = _id;
                 //depend.get()->pending_task.store(0, std::memory_order::memory_order_acquire);

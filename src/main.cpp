@@ -11,38 +11,44 @@ int main()
     Task::TaskGroup group2(threadGroup.get(), 1, Task::TaskKind::BackGround);
     Task::TaskGroup group3(threadGroup.get(), 2, Task::TaskKind::BackGround);
     Task::TaskGroup group4(threadGroup.get(), 3, Task::TaskKind::ForeGround);
+    Task::TaskGroup group5(threadGroup.get(), 4, Task::TaskKind::ForeGround);
     threadGroup->addDependency(group2, group1);
     threadGroup->addDependency(group3, group1);
     threadGroup->addDependency(group4, group2);
-    threadGroup->addDependency(group4, group3);
+    //threadGroup->addDependency(group4, group3);
+    threadGroup->addDependency(group5, group1);
     auto taskFunc = [](int a)->void
     {
         std::cout << "task func a = " << a << std::endl;
     };
-    for(int i = 0; i < 40; i ++)
+    for(int i = 0; i < 5; i ++)
     {
         auto realFunc = std::bind(taskFunc, i);
-        if(i < 5)
+        if(i < 1)
         {
             threadGroup->enqueueTask(std::move(realFunc), group1);
         }
-        else if(i < 10)
+        else if(i < 2)
         {
             threadGroup->enqueueTask(std::move(realFunc), group2);
         }
-        else if(i < 15)
+        else if(i < 3)
         {
             threadGroup->enqueueTask(std::move(realFunc), group3);
         }
-        else
+        else if(i < 4)
         {
             threadGroup->enqueueTask(std::move(realFunc), group4);
         }
+        else
+        {
+            threadGroup->enqueueTask(std::move(realFunc), group5);
+        }
     }
     threadGroup->submit(group1);
-    threadGroup->submit(group2);
-    threadGroup->submit(group3);
-    threadGroup->submit(group4);
+    //threadGroup->submit(group2);
+    //threadGroup->submit(group3);
+    //threadGroup->submit(group4);
     //threadGroup->stop();
     return 0;
 }
@@ -55,7 +61,7 @@ class A
         }
         int print()
         {
-            std::cout << "aaaaaaa " << c << std::endl;
+            //std::cout << "aaaaaaa " << c << std::endl;
             return c;
         }
     int c;

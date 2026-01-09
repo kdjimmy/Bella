@@ -135,6 +135,7 @@ namespace Task
                 taskDependency = dep;
                 callable = std::forward<T>(func);
             }
-            ~Task() { std::cerr << "Task dtor: " << this << "\n"; }
+            ~Task() { //std::cerr << "Task dtor: " << this << "\n"; 
+                }
     };
 }

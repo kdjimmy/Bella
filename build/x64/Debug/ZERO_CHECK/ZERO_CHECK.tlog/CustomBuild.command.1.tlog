@@ -1,0 +1,10 @@
+^D:\BELLA\BUILD\CMAKEFILES\DC447F58361C3B625C1D5345F835766A\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SD:/Bella -BD:/Bella/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file D:/Bella/build/BellaEngine.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
