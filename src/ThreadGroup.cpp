@@ -166,7 +166,7 @@ namespace Task
                 }
             }
         }
-        std::cout << "add to ready queue3" << std::endl;
+        //std::cout << "add to ready queue3" << std::endl;
     }
 
     void ThreadGroup::run_loop(uint32_t thread_id, TaskKind kind)
@@ -184,9 +184,9 @@ namespace Task
                 {
                     break;
                 }
-                std::cout << "getting id" << std::endl;
+                //std::cout << "getting id" << std::endl;
                 std::shared_ptr<Task> task = threadSet->taskQueue.front();
-                std::cout << "getting id111 " << task.get()->taskDependency.get()->id << std::endl;
+                //std::cout << "getting id111 " << task.get()->taskDependency.get()->id << std::endl;
                 threadSet->taskQueue.pop();
                 lk.unlock();
                 if (task.get()->callable.isActive())
@@ -194,6 +194,7 @@ namespace Task
                     ////std::cout << "thread id " << std::this_thread::get_id() << " is running a task" << std::endl;
                     task.get()->callable.call();
                 }
+                //std::cout << "task finished " << task.get()->taskDependency.get()->id << std::endl;
                 task.get()->taskDependency.get()->task_Completed();
                 auto tmp = completed_task_count.fetch_add(1, std::memory_order_acq_rel);
                 if (tmp + 1 == total_task_count.load(std::memory_order_acquire))
@@ -201,7 +202,7 @@ namespace Task
                     std::unique_lock<std::mutex> wait_lk(wait_mtx);
                     wait_cv.notify_all();
                 }
-                ////std::cout << "use count = " << task.use_count() << " dependency count = " << task.get()->taskDependency.use_count() << std::endl;
+                //std::cout << "use count = " << task.use_count() << " dependency count = " << task.get()->taskDependency.use_count() << std::endl;
             }
     }
 }

@@ -16,6 +16,7 @@ namespace Task
         auto tmp = pending_task.fetch_sub(1, std::memory_order_acq_rel);
         if (tmp == 1)            // all task has finished, call dependee to run
         {
+            //std::cout << "all tasks in group " << id << " have finished, notify dependees" << std::endl;
             notify_dependees();
         }
     }
@@ -27,10 +28,10 @@ namespace Task
         {
             signal->increase();
         }
-        ////std::cout << "notify dependees " << pending.size() << "dep id = " << id << std::endl;
+        //////std::cout << "notify dependees " << pending.size() << "dep id = " << id << std::endl;
         for (auto& taskDep : pending)
         {
-            ////std::cout << "pre id = " << id << " notify dependee id = " << taskDep.get()->id << std::endl;
+            //std::cout << "pre id = " << id << " notify dependee id = " << taskDep.get()->id << std::endl;
             taskDep.get()->dependency_satisfied();
         }
         //std::cout << "notify dependees done dep id = " << id << std::endl;
@@ -48,14 +49,14 @@ namespace Task
     bool TaskDependency::dependency_satisfied()
     {
         auto tmp = dependencyCount.fetch_sub(1, std::memory_order_acq_rel);
-        ////std::cout << "dependency count = " << tmp - 1 << "dep id" << id <<std::endl;
+        //std::cout << "dependency count = " << tmp - 1 << "dep id" << id <<std::endl;
         if (tmp <= 1)
         {
             if (tasks.size() > 0)
             {
-                ////std::cout << "add-task = " << id << "size = " << tasks.size() << std::endl;
+                //std::cout << "add-task = " << id << "size = " << tasks.size() << std::endl;
                 threadGroup->addToReadyQueue(std::move(tasks));
-                ////std::cout << "add task = " << id << "size = " << tasks.size() <<std::endl;
+                //std::cout << "add task = " << id << "size = " << tasks.size() <<std::endl;
                 tasks.clear();
             }
             else notify_dependees();

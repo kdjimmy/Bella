@@ -15,7 +15,7 @@ int main()
     threadGroup->addDependency(group2, group1);
     threadGroup->addDependency(group3, group1);
     threadGroup->addDependency(group4, group2);
-    //threadGroup->addDependency(group4, group3);
+    threadGroup->addDependency(group4, group3);
     threadGroup->addDependency(group5, group1);
     auto taskFunc = [](int a)->void
     {
@@ -49,7 +49,8 @@ int main()
     //threadGroup->submit(group2);
     //threadGroup->submit(group3);
     //threadGroup->submit(group4);
-    //threadGroup->stop();
+    threadGroup->waitIdle();
+    threadGroup->stop();
     return 0;
 }
 class A
