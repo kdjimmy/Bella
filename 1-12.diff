@@ -1,0 +1,34 @@
+diff --git a/src/ThreadGroup.cpp b/src/ThreadGroup.cpp
+index ea8d0c0..861479c 100644
+--- a/src/ThreadGroup.cpp
++++ b/src/ThreadGroup.cpp
+@@ -18,6 +18,8 @@ namespace Task
+             return;
+         }
+ 
++
++        waitIdle();
+         dead = true;
+         {
+             //std::cout << "hhhhh2 " << std::this_thread::get_id() << std::endl;
+@@ -29,7 +31,6 @@ namespace Task
+             std::unique_lock<std::mutex> lk(backGround.mtx);
+             backGround.cv.notify_all();
+         }
+-        waitIdle();
+         // call all threads to stop
+ 
+ 
+diff --git a/src/main.cpp b/src/main.cpp
+index 6d6a1dd..76bc233 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -49,7 +49,7 @@ int main()
+     //threadGroup->submit(group2);
+     //threadGroup->submit(group3);
+     //threadGroup->submit(group4);
+-    threadGroup->waitIdle();
++    //threadGroup->waitIdle();
+     threadGroup->stop();
+     return 0;
+ }

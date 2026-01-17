@@ -18,6 +18,8 @@ namespace Task
             return;
         }
 
+
+        waitIdle();
         dead = true;
         {
             //std::cout << "hhhhh2 " << std::this_thread::get_id() << std::endl;
@@ -29,7 +31,6 @@ namespace Task
             std::unique_lock<std::mutex> lk(backGround.mtx);
             backGround.cv.notify_all();
         }
-        waitIdle();
         // call all threads to stop
 
 

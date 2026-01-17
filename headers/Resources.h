@@ -5,9 +5,9 @@
 #include <iostream>
 #include <stdio.h>
 #include <set>
-#include <unordered_set>>
+#include <unordered_set>
 
-namespace Resource
+namespace Bella
 {
     enum RenderResourceType {
         Texture,            // 普通纹理
@@ -81,11 +81,11 @@ namespace Resource
             {
                 return physical_index;
             }
-            std::unordered_set<unsigned int> getWriteInPasses() const
+            const std::unordered_set<unsigned int>& getWriteInPasses() const
             {
                 return write_in_passes;
             }
-            std::unordered_set<unsigned int> getReadInPasses() const
+            const std::unordered_set<unsigned int>& getReadInPasses() const
             {
                 return read_in_passes;
             }
@@ -150,7 +150,7 @@ namespace Resource
             VkImageLayout imageLayout = VK_IMAGE_LAYOUT_GENERAL;
             VkSurfaceTransformFlagBitsKHR transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
 
-            bool operator=(const TextureResourceDescription& other)const
+            bool operator==(const TextureResourceDescription& other)const
             {
                 return format == other.format &&
                 width == other.width &&
@@ -174,10 +174,10 @@ namespace Resource
             bool transient = false; // 是否允许 transient（一般 false）
             VkPipelineStageFlags2 stages = 0;
             VkAccessFlags2 access = 0; 
-            bool operator=(const BufferResourceDescription& other)const
+            bool operator==(const BufferResourceDescription& other)const
             {
-                return (size == other.size) && (stride == other.stride) && (usage == other.usage)
-                    && (queueType == other.queueType) && (flags == other.flags) && (stages == other.stages) && (access == other.access);
+                return (size == other.size) && (stride == other.stride)
+                    && (queueType == other.queueType) && (flags == other.flags);
             }
     };
 
@@ -210,20 +210,33 @@ namespace Resource
                         break;
                     case AttachmentType::Storage:
                         desc.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-                        desc.imageUsage |- VK_IMAGE_USAGE_STORAGE_BIT;
+                        desc.imageUsage |= VK_IMAGE_USAGE_STORAGE_BIT;
                         break;
                 }
             }
-    };
-
-    class RenderBufferResource: public RenderResource
-    {
-        public:
-            BufferResourceDescription bufferInfo;
-            inline void addBufferInfo(const BufferResourceDescription& other)
+            inline AttachmentInfo& getAttachmentInfo()
             {
-                bufferInfo = other;
-                ///  should use or??????
+                return attachmentInfo;
             }
     };
+
+    class RenderBufferResource : public RenderResource
+    {
+    public:
+        BufferResourceDescription bufferInfo;
+
+        RenderBufferResource(RenderResourceType t, unsigned idx, const char* name)
+            : RenderResource(t, idx, name) {}
+
+        inline void setBufferInfo(const BufferResourceDescription& other)
+        {
+            bufferInfo = other;
+        }
+
+        inline void addUsage(VkBufferUsageFlags usage)
+        {
+            bufferInfo.usage |= usage;
+        }
+    };
+
 }
