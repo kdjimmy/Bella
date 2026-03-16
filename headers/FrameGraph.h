@@ -1,5 +1,7 @@
 #include "RenderPass.h"
 #include <memory>
+
+using namespace Bella;
 namespace FrameGraph
 {
     class FrameGraph
@@ -17,7 +19,7 @@ namespace FrameGraph
         }
     private:
         std::vector<std::shared_ptr<RenderPass>> passes;
-        std::vector<std::shared_ptr<Resource::RenderResource>> resources;
+        std::vector<std::shared_ptr<RenderResource>> resources;
         std::unordered_map<std::string, unsigned> pass_to_index;
         std::unordered_map<std::string, unsigned> resource_to_index;
         std::vector<std::unordered_set<unsigned>> pass_dependencies;
