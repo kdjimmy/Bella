@@ -1,25 +1,27 @@
+#pragma once
+
 #include <vulkan/vulkan.h>
-#include <vector>
-#include <mutex>
 #include <functional>
 #include <iostream>
-#include <stdio.h>
+#include <mutex>
 #include <set>
+#include <string>
 #include <unordered_set>
+#include <vector>
 
 namespace Bella
 {
     enum RenderResourceType {
-        Texture,            // 普通纹理
-        ColorAttachment,    // 颜色附件
-        DepthStencil,       // 深度/模板附件
-        StorageTexture,     // 可读写纹理
-        BlitTexture,        // 用于 Blit 的纹理
-        GenericTexture,     // 普通采样纹理
-        Buffer,             // 通用 Buffer
-        StorageBuffer,      // 可读写 Buffer
-        HistoryTexture,     // 历史帧（TAA/SSR）
-        Proxy,              // 跨队列同步的代理资源
+        Texture,
+        ColorAttachment,
+        DepthStencil,
+        StorageTexture,
+        BlitTexture,
+        GenericTexture,
+        Buffer,
+        StorageBuffer,
+        HistoryTexture,
+        Proxy,
     };
 
     enum RenderGraphQueueType {
@@ -51,55 +53,70 @@ namespace Bella
                 index = _index;
                 name = _name;
             }
+
+            virtual ~RenderResource() = default;
             RenderResource& operator=(const RenderResource& other) = delete;
             RenderResource(const RenderResource& other) = delete;
+
             inline RenderResourceType getType() const
             {
                 return type;
             }
+
             inline unsigned int getIndex() const
             {
                 return index;
             }
+
             inline std::string getName() const
             {
                 return name;
             }
+
             inline void addQueue(RenderGraphQueueType other)
             {
                 queue_Types = static_cast<RenderGraphQueueType>(queue_Types | other);
             }
+
             inline RenderGraphQueueType getQueue() const
             {
                 return queue_Types;
             }
-            inline void setPhysicalIndex(unsigned int index)
+
+            inline void setPhysicalIndex(unsigned int indexValue)
             {
-                physical_index = index;
+                physical_index = indexValue;
             }
+
             inline unsigned int getPhysicalIndex() const
             {
                 return physical_index;
             }
+
             const std::unordered_set<unsigned int>& getWriteInPasses() const
             {
                 return write_in_passes;
             }
+
             const std::unordered_set<unsigned int>& getReadInPasses() const
             {
                 return read_in_passes;
             }
+
             inline void addWriteInPasses(unsigned int pass)
             {
                 write_in_passes.emplace(pass);
             }
+
             inline void addReadInPasses(unsigned int pass)
             {
                 read_in_passes.emplace(pass);
             }
+
         private:
             RenderResourceType type;
-            unsigned int index, physical_index;
+            unsigned int index = 0;
+            unsigned int physical_index = 0;
             std::string name;
             RenderGraphQueueType queue_Types = FRAME_GRAPH_UNDEFINED_QUEUE;
             std::unordered_set<unsigned int> write_in_passes;
@@ -108,19 +125,17 @@ namespace Bella
 
     struct AttachmentInfo
     {
-        VkFormat format = VK_FORMAT_UNDEFINED;          // 图像格式（RGBA16F、D32F 等）
+        VkFormat format = VK_FORMAT_UNDEFINED;
         VkImageLayout initial_layout = VK_IMAGE_LAYOUT_UNDEFINED;
-        VkImageLayout final_layout   = VK_IMAGE_LAYOUT_UNDEFINED;
-        VkAttachmentLoadOp  load_op  = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        VkImageLayout final_layout = VK_IMAGE_LAYOUT_UNDEFINED;
+        VkAttachmentLoadOp load_op = VK_ATTACHMENT_LOAD_OP_CLEAR;
         VkAttachmentStoreOp store_op = VK_ATTACHMENT_STORE_OP_STORE;
-        VkClearColorValue clear_color = {};             // Color clear
-        VkClearDepthStencilValue clear_depth_stencil = {1.0f, 0}; // Depth clear
-        uint32_t samples = 1;                           // MSAA
-        uint32_t levels  = 1;                           // mip levels
-        uint32_t layers  = 1;                           // array layers
+        VkClearColorValue clear_color = {};
+        VkClearDepthStencilValue clear_depth_stencil = {1.0f, 0};
+        uint32_t samples = 1;
+        uint32_t levels = 1;
+        uint32_t layers = 1;
         AttachmentLifeCircle flags = ATTACHMENT_PERSISTENT_BIT;
-        // flags: TRANSIENT / PERSISTENT / MIPGEN / HISTORY 等
-        // 可选：用于区分 Color / Depth / Resolve / StorageTexture
         AttachmentType type = AttachmentType::Color;
     };
 
@@ -129,6 +144,7 @@ namespace Bella
         public:
             RenderGraphQueueType queueType;
             AttachmentLifeCircle flags;
+
             ResourceDescription()
             {
                 flags = ATTACHMENT_PERSISTENT_BIT;
@@ -150,17 +166,17 @@ namespace Bella
             VkImageLayout imageLayout = VK_IMAGE_LAYOUT_GENERAL;
             VkSurfaceTransformFlagBitsKHR transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
 
-            bool operator==(const TextureResourceDescription& other)const
+            bool operator==(const TextureResourceDescription& other) const
             {
                 return format == other.format &&
-                width == other.width &&
-                height == other.height &&
-                depth == other.depth &&
-                layers == other.layers &&
-                levels == other.levels &&
-                flags == other.flags &&
-                imageLayout == other.imageLayout &&
-                transform == other.transform;
+                    width == other.width &&
+                    height == other.height &&
+                    depth == other.depth &&
+                    layers == other.layers &&
+                    levels == other.levels &&
+                    flags == other.flags &&
+                    imageLayout == other.imageLayout &&
+                    transform == other.transform;
             }
     };
 
@@ -170,14 +186,17 @@ namespace Bella
             unsigned int size = 0;
             unsigned int stride = 0;
             VkBufferUsageFlags usage = 0;
-            bool persistent = false; // 是否跨帧保留（history buffer） 
-            bool transient = false; // 是否允许 transient（一般 false）
+            bool persistent = false;
+            bool transient = false;
             VkPipelineStageFlags2 stages = 0;
-            VkAccessFlags2 access = 0; 
-            bool operator==(const BufferResourceDescription& other)const
+            VkAccessFlags2 access = 0;
+
+            bool operator==(const BufferResourceDescription& other) const
             {
-                return (size == other.size) && (stride == other.stride)
-                    && (queueType == other.queueType) && (flags == other.flags);
+                return (size == other.size) &&
+                    (stride == other.stride) &&
+                    (queueType == other.queueType) &&
+                    (flags == other.flags);
             }
     };
 
@@ -185,8 +204,13 @@ namespace Bella
     {
         private:
             AttachmentInfo attachmentInfo;
+
         public:
+            RenderTextureResource(RenderResourceType t, unsigned idx, const char* name)
+                : RenderResource(t, idx, name) {}
+
             TextureResourceDescription desc;
+
             inline void setAttachmentInfo(const AttachmentInfo& info)
             {
                 attachmentInfo = info;
@@ -214,6 +238,7 @@ namespace Bella
                         break;
                 }
             }
+
             inline AttachmentInfo& getAttachmentInfo()
             {
                 return attachmentInfo;
@@ -222,21 +247,20 @@ namespace Bella
 
     class RenderBufferResource : public RenderResource
     {
-    public:
-        BufferResourceDescription bufferInfo;
+        public:
+            RenderBufferResource(RenderResourceType t, unsigned idx, const char* name)
+                : RenderResource(t, idx, name) {}
 
-        RenderBufferResource(RenderResourceType t, unsigned idx, const char* name)
-            : RenderResource(t, idx, name) {}
+            BufferResourceDescription bufferInfo;
 
-        inline void setBufferInfo(const BufferResourceDescription& other)
-        {
-            bufferInfo = other;
-        }
+            inline void setBufferInfo(const BufferResourceDescription& other)
+            {
+                bufferInfo = other;
+            }
 
-        inline void addUsage(VkBufferUsageFlags usage)
-        {
-            bufferInfo.usage |= usage;
-        }
+            inline void addUsage(VkBufferUsageFlags usage)
+            {
+                bufferInfo.usage |= usage;
+            }
     };
-
 }

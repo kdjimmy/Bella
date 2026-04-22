@@ -1,14 +1,18 @@
+#pragma once
+
 #include "RenderPass.h"
 #include <memory>
+#include <unordered_map>
+
 namespace Bella
 {
     struct Barrier
     {
-        unsigned index;
-        VkImageLayout imageLayout;
-        VkPipelineStageFlags2 stage;
-        VkAccessFlags2 access;
-        bool history;
+        unsigned index = 0;
+        VkImageLayout imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        VkPipelineStageFlags2 stage = 0;
+        VkAccessFlags2 access = 0;
+        bool history = false;
     };
 
     struct Barriers
@@ -17,12 +21,13 @@ namespace Bella
         std::vector<Barrier> flush;
     };
 
-    std::vector<Barriers> pass_barriers;            //total added barrier
+    inline std::vector<Barriers> pass_barriers;
 
     class RenderGraph
     {
     public:
         RenderGraph() = default;
+
     private:
         VkDevice* device = nullptr;
         std::vector<std::unique_ptr<RenderPass>> renderPasses;

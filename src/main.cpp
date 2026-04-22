@@ -1,9 +1,17 @@
 #include "FrameGraph.h"
 //#include "Task.h"
 #include "ThreadGroup.h"
-
+#include "BaseEngine.h"
 
 int main()
+{
+    BaseEngine* engine = new BaseEngine();
+    engine->Create({0});
+    engine->Impl->initialize();
+    engine->Impl->cleanUp();
+    return 0;
+}
+int main2()
 {
     std::unique_ptr<Task::ThreadGroup> threadGroup = std::make_unique<Task::ThreadGroup>();
     threadGroup->start(20, 20);
