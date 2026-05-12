@@ -34,12 +34,15 @@ class VulkanSwapchain
                       std::optional<VkFormat> preferredFormat = std::nullopt,
                       std::optional<VkColorSpaceKHR> preferredColorSpace = std::nullopt);
         void cleanUp();
-
+        void setRenderPass(VkRenderPass& renderPass);
         VkSwapchainKHR getHandle() const;
         VkFormat getFormat() const;
         VkExtent2D getExtent() const;
         const std::vector<VkImage>& getImages() const;
         const std::vector<VkImageView>& getImageViews() const;
+        const std::vector<VkFramebuffer>& getFramebuffers() const;
+        void createFramebuffers();
+
 
     private:
         VulkanSwapchainSupportDetails querySupport(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface) const;
@@ -65,4 +68,6 @@ class VulkanSwapchain
         VkExtent2D m_extent{};
         std::vector<VkImage> m_images;
         std::vector<VkImageView> m_imageViews;
+        std::vector<VkFramebuffer> m_frameBuffers;
+        VkRenderPass m_renderPass = VK_NULL_HANDLE;
 };

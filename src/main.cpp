@@ -2,13 +2,34 @@
 //#include "Task.h"
 #include "ThreadGroup.h"
 #include "BaseEngine.h"
-
+#include <GLFW/glfw3.h>
+std::unique_ptr<BaseEngine> BaseEngine::instance = nullptr;
+std::shared_ptr<BaseImpl> BaseEngine::Impl = nullptr;
 int main()
 {
+
+    if(!glfwInit())
+    {
+        std::cout << "fail to init glfw!" << std::endl;
+    }
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // 禁用 OpenGL
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+    GLFWwindow* window = glfwCreateWindow(1920, 1680, "window", nullptr, nullptr);
+    if(!window)
+    {
+        std::cout << "fail to create window!" << std::endl;
+    }
+
     BaseEngine* engine = new BaseEngine();
     engine->Create({0});
-    engine->Impl->initialize();
+    engine->Impl->initialize(window);
+    while(!glfwWindowShouldClose(window))
+    {
+        glfwPollEvents();
+    }
     engine->Impl->cleanUp();
+    glfwDestroyWindow(window);
+    glfwTerminate();
     return 0;
 }
 int main2()

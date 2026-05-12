@@ -165,6 +165,7 @@ void VulkanSwapchain::recreate(uint32_t preferredWidth,
         preferredPresentMode,
         preferredFormat,
         preferredColorSpace);
+    createFramebuffers();
 }
 
 void VulkanSwapchain::cleanUp()
@@ -365,4 +366,49 @@ VkCompositeAlphaFlagBitsKHR VulkanSwapchain::chooseCompositeAlpha(const VkSurfac
     }
 
     return VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+}
+
+const std::vector<VkFramebuffer>& VulkanSwapchain::getFramebuffers() const
+{
+    return m_frameBuffers;
+}
+
+void VulkanSwapchain::setRenderPass(VkRenderPass& renderPass) 
+{
+    if(m_renderPass != VK_NULL_HANDLE)
+    {
+        if(m_renderPass != renderPass)
+        {
+            m_renderPass = renderPass;
+            createFramebuffers();
+            return;
+        }
+    }
+    m_renderPass = renderPass;
+}
+
+void VulkanSwapchain::createFramebuffers()
+{
+    if(m_imageViews.empty()) return;
+    if(m_frameBuffers.size())
+    {
+        for(auto& framebuffer:m_frameBuffers)
+        {
+            vkDestroyFramebuffer(m_device, framebuffer, nullptr);
+        }
+        m_frameBuffers.clear();
+    }
+    m_frameBuffers.resize(m_images.size());
+    for(int i = 0; i < m_frameBuffers.size(); i ++)
+    {
+        VkFramebufferCreateInfo fbInfo{};
+        fbInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        fbInfo.renderPass = m_renderPass;
+        fbInfo.attachmentCount = 1;
+        fbInfo.pAttachments = &m_imageViews[i];
+        fbInfo.width = m_extent.width;
+        fbInfo.height = m_extent.height;
+        fbInfo.layers = 1;
+        VK_CHECK(vkCreateFramebuffer(m_device, &fbInfo, nullptr, &m_frameBuffers[i]));
+    }
 }

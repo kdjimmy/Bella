@@ -3,7 +3,6 @@
 #include "BaseImpl.h"
 #include "VulkanContext.h"
 #include "VulkanSwapchain.h"
-#include <GLFW/glfw3.h>
 
 class VulkanImpl: public BaseImpl
 {
@@ -11,7 +10,7 @@ class VulkanImpl: public BaseImpl
         VulkanImpl();
         ~VulkanImpl() override;
 
-        void initialize() override;
+        void initialize(GLFWwindow* window) override;
         void cleanUp() override;
         void run() override;
         void render() override;

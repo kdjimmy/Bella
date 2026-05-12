@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <stdexcept>
+#define VMA_IMPLEMENTATION
+#include "vk_mem_alloc.h"
 
 VulkanResourceManager::VulkanResourceManager(VkPhysicalDevice physicalDevice,
                                              VkDevice device,

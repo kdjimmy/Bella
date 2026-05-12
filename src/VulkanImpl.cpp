@@ -14,10 +14,10 @@ VulkanImpl::~VulkanImpl()
     std::cout << "deleting vulkanimpl" << std::endl;
 }
 
-void VulkanImpl::initialize()
+void VulkanImpl::initialize(GLFWwindow* window)
 {
+    m_context.setWindow(window);
     m_context.initialize();
-
     if(m_context.getSurface() != VK_NULL_HANDLE)
     {
         createSwapChain(1920, 1680, 1);

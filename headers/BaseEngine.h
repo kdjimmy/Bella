@@ -25,7 +25,7 @@ class BaseEngine
                 Impl.reset(new VulkanImpl());
             }
         }
+        static std::shared_ptr<BaseImpl> Impl;
     private:
         static std::unique_ptr<BaseEngine> instance;
-        static std::shared_ptr<BaseImpl> Impl;
 };

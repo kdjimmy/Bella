@@ -94,13 +94,16 @@ void VulkanContext::initialize()
 
 void VulkanContext::cleanUp()
 {
+    if(m_pool != VK_NULL_HANDLE)
+    {
+        vkDestroyCommandPool(m_device, m_pool, nullptr);    
+    }
     if (m_device != VK_NULL_HANDLE)
     {
         vkDeviceWaitIdle(m_device);
         vkDestroyDevice(m_device, nullptr);
         m_device = VK_NULL_HANDLE;
     }
-
     if (m_surface != VK_NULL_HANDLE && m_instance != VK_NULL_HANDLE)
     {
         vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
@@ -274,12 +277,12 @@ void VulkanContext::createDevice()
     {
         deviceExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
     }
-    AppendVmaDeviceExtensions(deviceExtensions, VK_API_VERSION_1_4);
+    AppendVmaDeviceExtensions(deviceExtensions, VK_API_VERSION_1_3);
     createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
     createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
     VK_CHECK(vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_device));
-    m_vmaAllocatorFlags = BuildVmaAllocatorCreateFlags(VK_API_VERSION_1_4);
+    m_vmaAllocatorFlags = BuildVmaAllocatorCreateFlags(VK_API_VERSION_1_3);
 
     vkGetDeviceQueue(m_device, static_cast<uint32_t>(m_queues.graphicFamily), 0, &m_queues.graphicQueue);
     vkGetDeviceQueue(m_device, static_cast<uint32_t>(m_queues.computeFamily), 0, &m_queues.computeQueue);
@@ -449,3 +452,58 @@ void VulkanContext::findQueueFamilyIndices(VkPhysicalDevice physicaldevice)
         throw std::runtime_error("failed to find present queue family.");
     }
 }
+
+void VulkanContext::createCommandPool(uint32_t familyIndex, VkCommandPoolCreateFlags flag)
+{
+    VkCommandPoolCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    createInfo.queueFamilyIndex = familyIndex;
+    createInfo.flags = flag;
+    VK_CHECK(vkCreateCommandPool(m_device, &createInfo, nullptr, &m_pool));
+}
+
+std::vector<VkCommandBuffer> VulkanContext::createCommandBuffer(VkCommandBufferLevel level, uint32_t commandBufferCount)
+{
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.commandPool = m_pool;
+    allocInfo.level = level;
+    allocInfo.commandBufferCount = commandBufferCount;
+    allocInfo.pNext = nullptr;
+    std::vector<VkCommandBuffer> commandBuffers(commandBufferCount);
+    VK_CHECK(vkAllocateCommandBuffers(m_device, &allocInfo, commandBuffers.data()));
+    return commandBuffers;
+}
+
+void VulkanContext::recordCommandBuffers(VkCommandBuffer commandBuffer, uint32_t imageIdx, VkRenderPass renderPass, 
+    VkExtent2D swapchainExtent, VkFramebuffer framebuffer)
+{
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to begin recording command buffer!");
+    }
+    VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
+    VkRenderPassBeginInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = renderPass;
+    renderPassInfo.framebuffer = framebuffer;
+    renderPassInfo.renderArea.offset = {0, 0};
+    renderPassInfo.renderArea.extent = swapchainExtent;
+    renderPassInfo.clearValueCount = 1;
+    renderPassInfo.pClearValues = &clearColor;
+    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+    //APPEND THE CONTENT OF RENDER PASS
+    vkCmdEndRenderPass(commandBuffer);
+    VK_CHECK(vkEndCommandBuffer(commandBuffer));
+}
+
+void VulkanContext::submitQueue(const std::vector<VkCommandBuffer>& commandBuffers, VkQueue& queue)
+{
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = commandBuffers.size();
+    submitInfo.pCommandBuffers = commandBuffers.data();
+    vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
+}
+
