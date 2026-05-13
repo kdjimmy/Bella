@@ -14,4 +14,4 @@ class VulkanRenderPass
         std::vector<VkSubpassDependency> m_subpassDeps;
         VkDevice m_device;
         VkRenderPass m_renderPass;
-}
+};

@@ -19,8 +19,8 @@ class VulkanContext
         void createSurface();
         void pickPhysicalDevice();
         void createDevice();
-        void createCommandPool(uint32_t familyIndex, VkCommandPoolCreateFlags flag = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
-        std::vector<VkCommandBuffer> createCommandBuffer(VkCommandBufferLevel level, uint32_t commandBufferCount);
+        //void createCommandPool(uint32_t familyIndex, VkCommandPoolCreateFlags flag = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
+        //std::vector<VkCommandBuffer> createCommandBuffer(VkCommandBufferLevel level, uint32_t commandBufferCount);
 
         VkInstance getInstance() const;
         VkPhysicalDevice getPhysicalDevice() const;
@@ -29,8 +29,8 @@ class VulkanContext
         const VulkanQueueInfo& getQueues() const;
         VmaAllocatorCreateFlags getVmaAllocatorCreateFlags() const;
         bool isDebugEnabled() const;
-        void recordCommandBuffers(VkCommandBuffer commandBuffer, uint32_t imageIdx, VkRenderPass renderPass, VkExtent2D swapchainExtent, VkFramebuffer framebuffer);
-        void submitQueue(const std::vector<VkCommandBuffer>& commandBuffers, VkQueue& queue);
+        //void recordCommandBuffers(VkCommandBuffer commandBuffer, uint32_t imageIdx, VkRenderPass renderPass, VkExtent2D swapchainExtent, VkFramebuffer framebuffer);
+        //void submitQueue(const std::vector<VkCommandBuffer>& commandBuffers, VkQueue& queue);
 
     private:
         bool checkLayersSupport(std::vector<const char*>& layerName);

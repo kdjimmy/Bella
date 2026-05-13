@@ -179,6 +179,14 @@ void VulkanSwapchain::cleanUp()
                 vkDestroyImageView(m_device, imageView, nullptr);
             }
         }
+
+        for (VkFramebuffer frameBuffer : m_frameBuffers)
+        {
+            if (frameBuffer != VK_NULL_HANDLE)
+            {
+                vkDestroyFramebuffer(m_device, frameBuffer, nullptr);
+            }
+        }
     }
 
     m_imageViews.clear();

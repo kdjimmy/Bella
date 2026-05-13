@@ -453,6 +453,7 @@ void VulkanContext::findQueueFamilyIndices(VkPhysicalDevice physicaldevice)
     }
 }
 
+#if 0
 void VulkanContext::createCommandPool(uint32_t familyIndex, VkCommandPoolCreateFlags flag)
 {
     VkCommandPoolCreateInfo createInfo{};
@@ -506,4 +507,4 @@ void VulkanContext::submitQueue(const std::vector<VkCommandBuffer>& commandBuffe
     submitInfo.pCommandBuffers = commandBuffers.data();
     vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
 }
-
+#endif
